@@ -5,31 +5,39 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Dars jadvali — E-Maktab</title>
 <style>
-  :root{--bg:#1e1e1e;--card:#2a2a2a;--card-hover:#333;--text:#eaf0ff;--muted:#9aa4b2;--accent:#2b6df6;}
+  :root{--bg:#1e1e1e;--card:#2a2a2a;--card-hover:#333;--text:#eaf0ff;--muted:#9aa4b2;--accent:#2b6df6;--green:#00d4aa;--blue:#2b6df6;}
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);padding:28px 20px 140px;display:flex;flex-direction:column;align-items:center;min-height:100vh;}
- 
+  body{font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);padding:28px 20px 160px;display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+  
   .fade-line{opacity:0;transform:translateY(8px);text-align:center;animation:fadeInUp .7s forwards;}
   .fade-1{animation-delay:.2s;font-size:26px;font-weight:700;margin:6px 0;}
   .fade-2{animation-delay:.9s;font-size:20px;color:var(--muted);}
   .fade-3{animation-delay:1.6s;font-size:18px;color:var(--muted);}
   @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
 
-  .card{width:100%;max-width:620px;background:var(--card);border-radius:16px;padding:20px;margin-top:34px;box-shadow:0 8px 28px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.02);opacity:0;transform:translateY(12px);animation:cardAppear .7s 2.4s forwards;}
+  .card{width:100%;max-width:640px;background:var(--card);border-radius:16px;padding:20px;margin-top:34px;box-shadow:0 8px 28px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.02);opacity:0;transform:translateY(12px);animation:cardAppear .7s 2.4s forwards;}
   @keyframes cardAppear{to{opacity:1;transform:translateY(0)}}
 
   .card h2{text-align:center;margin-bottom:12px;font-size:20px;}
-  .row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:14px;margin-bottom:10px;transition:all .2s;cursor:pointer;}
-  .row:hover{background:var(--card-hover);transform:scale(1.02);box-shadow:0 8px 18px rgba(0,0,0,.5);}
-  .row.disabled{opacity:.55;cursor:default;}
-  .row.disabled:hover{transform:none;background:transparent;}
-  .left{gap:4px;display:flex;flex-direction:column;}
+  .row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:14px;margin-bottom:10px;transition:all .25s;}
+  .row.disabled{opacity:.55;pointer-events:none;}
+  .row:hover{background:var(--card-hover);}
+
+  .left{gap:4px;display:flex;flex-direction:column;flex:1;cursor:pointer;}
   .num{font-weight:700;font-size:15px;}
   .sub{font-weight:600;color:#dfe7f7;font-size:14px;}
   .time{color:var(--muted);font-size:13px;}
-  .rightLabel{color:var(--muted);font-size:13px;min-width:120px;text-align:right;}
 
-  /* Faqat 2 ta tugma — kengroq va chiroyli */
+  .buttons{display:flex;gap:10px;align-items:center;}
+  .btn{
+    padding:8px 12px;border-radius:10px;font-size:13px;font-weight:600;
+    transition:all .2s;cursor:pointer;white-space:nowrap;
+  }
+  .btn-journal{background:var(--blue);color:white;}
+  .btn-journal:hover{background:#1a5be0;}
+  .btn-homework{background:var(--green);color:white;}
+  .btn-homework:hover{background:#00b894;}
+
   .bottom-bar{
     position:fixed;bottom:0;left:0;right:0;
     background:rgba(30,30,30,.95);backdrop-filter:blur(12px);
@@ -44,11 +52,6 @@
   }
   .nav-btn:hover{transform:translateY(-4px);background:var(--card-hover);}
   .nav-btn span{font-size:28px;}
-
-  @media(max-width:480px){
-    .nav-btn{font-size:15px;padding:16px 8px;}
-    .nav-btn span{font-size:24px;}
-  }
 </style>
 </head>
 <body>
@@ -62,32 +65,51 @@
   <div id="rowsContainer"></div>
 </div>
 
-<!-- Faqat 2 ta tugma qoldirdim -->
 <div class="bottom-bar">
   <button class="nav-btn" onclick="window.open('https://emaktab.uz/teachers','_blank')">
-    <span>🏠</span> Bosh ekran
+    <span></span> Bosh ekran
   </button>
   <button class="nav-btn" id="hisobotBtn">
-    <span>📊</span> Hisobot
+    <span></span> Hisobot
   </button>
 </div>
 
 <script>
+// Jurnal linklari (statik)
 const journalLinks = {
-  "6A|ONA TILI":"https://emaktab.uz/journal/school/1000005977908/group/2388005413423903573/subject/1871705191453506349?periodId=2392904064143140032&subGroupId=",
-  "6A|ADABIYOT":"https://emaktab.uz/journal/school/1000005977908/group/2388005413423903573/subject/1817016797347913127?periodId=2392904064143140032&subGroupId=",
-  "6A|KELAJAK":"https://emaktab.uz/journal/school/1000005977908/group/2388005413423903573/subject/2395074680484989271?periodId=2392904064143140032&subGroupId=",
-  "6B|ONA TILI":"https://emaktab.uz/journal/school/1000005977908/group/2388004936682533712/subject/1871705191453506349?periodId=2392904064143140032&subGroupId=",
-  "6B|ADABIYOT":"https://emaktab.uz/journal/school/1000005977908/group/2388004936682533712/subject/1817016797347913127?periodId=2392904064143140032&subGroupId=",
-  "7A|ONA TILI":"https://emaktab.uz/journal/school/1000005977908/group/2388004520070705999/subject/1871705191453506349?periodId=2392904064143140032&subGroupId=",
-  "7A|ADABIYOT":"https://emaktab.uz/journal/school/1000005977908/group/2388004520070705999/subject/1817016797347913127?periodId=2392904064143140032&subGroupId=",
-  "9|ONA TILI":"https://emaktab.uz/journal/school/1000005977908/group/2388001994629935936/subject/1871705191453506349?periodId=2392904064143140032&planningPeriodId=2392904064143140032&source=schedule_widget&subGroupId=",
-  "9|ADABIYOT":"https://emaktab.uz/journal/school/1000005977908/group/2388001994629935936/subject/1817016797347913127?periodId=2392904064143140032&planningPeriodId=2392904064143140032&source=schedule_widget&subGroupId=",
-  "11|ONA TILI":"https://emaktab.uz/journal/school/1000005977908/group/2388000766269289205/subject/1871705191453506349?periodId=2392904064143140032&subGroupId=",
-  "11|ADABIYOT":"https://emaktab.uz/journal/school/1000005977908/group/2388000766269289205/subject/1817016797347913127?periodId=2392904064143140032&subGroupId="
+  "6A|ONA TILI": "https://emaktab.uz/journal/school/1000005977908/group/2388005413423903573/subject/1871705191453506349?periodId=2392904064143140032&subGroupId=",
+  "6A|ADABIYOT": "https://emaktab.uz/journal/school/1000005977908/group/2388005413423903573/subject/1817016797347913127?periodId=2392904064143140032&subGroupId=",
+  "6A|KELAJAK": "https://emaktab.uz/journal/school/1000005977908/group/2388005413423903573/subject/2395074680484989271?periodId=2392904064143140032&subGroupId=",
+  "6B|ONA TILI": "https://emaktab.uz/journal/school/1000005977908/group/2388004936682533712/subject/1871705191453506349?periodId=2392904064143140032&subGroupId=",
+  "6B|ADABIYOT": "https://emaktab.uz/journal/school/1000005977908/group/2388004936682533712/subject/1817016797347913127?periodId=2392904064143140032&subGroupId=",
+  "7A|ONA TILI": "https://emaktab.uz/journal/school/1000005977908/group/2388004520070705999/subject/1871705191453506349?periodId=2392904064143140032&subGroupId=",
+  "7A|ADABIYOT": "https://emaktab.uz/journal/school/1000005977908/group/2388004520070705999/subject/1817016797347913127?periodId=2392904064143140032&subGroupId=",
+  "9|ONA TILI": "https://emaktab.uz/journal/school/1000005977908/group/2388001994629935936/subject/1871705191453506349?periodId=2392904064143140032&planningPeriodId=2392904064143140032&source=schedule_widget&subGroupId=",
+  "9|ADABIYOT": "https://emaktab.uz/journal/school/1000005977908/group/2388001994629935936/subject/1817016797347913127?periodId=2392904064143140032&planningPeriodId=2392904064143140032&source=schedule_widget&subGroupId=",
+  "11|ONA TILI": "https://emaktab.uz/journal/school/1000005977908/group/2388000766269289205/subject/1871705191453506349?periodId=2392904064143140032&subGroupId=",
+  "11|ADABIYOT": "https://emaktab.uz/journal/school/1000005977908/group/2388000766269289205/subject/1817016797347913127?periodId=2392904064143140032&subGroupId="
 };
 
-const week = {
+// Uyga vazifa dinamik linklar uchun ma'lumotlar
+const homeworkData = {
+  "6A": { "ONA TILI": "1871705191453506349", "ADABIYOT": "1817016797347913127", groupId: "2388005413423903573" },
+  "6B": { "ONA TILI": "1871705191453506349", "ADABIYOT": "1817016797347913127", groupId: "2388004936682533712" },
+  "7A": { "ONA TILI": "1871705191453506349", "ADABIYOT": "1817016797347913127", groupId: "2388004520070705999" },
+  "9":  { "ONA TILI": "1871705191453506349", "ADABIYOT": "1817016797347913127", groupId: "2388001994629935936" },
+  "11": { "ONA TILI": "1871705191453506349", "ADABIYOT": "1817016797347913127", groupId: "2388000766269289205" }
+};
+
+function getTodayHomeworkUrl(cls, subjKey) {
+  if (!homeworkData[cls] || !homeworkData[cls][subjKey]) return null;
+  const data = homeworkData[cls][subjKey];
+  const today = new Date();
+  const d = String(today.getDate()).padStart(2, '0');
+  const m = String(today.getMonth() + 1).padStart(2, '0');
+  const y = today.getFullYear();
+  return `https://schools.emaktab.uz/v2/homework?school=1000005977908&tab=&studyYear=2025&group=${homeworkData[cls].groupId}&subject=${data}&teacher=1000010096961&datefrom=${d}%2F${m}%2F${y}&dateto=${d}%2F${m}%2F${y}&choose=Topish`;
+}
+
+const week = { /* oldingi jadvalingiz to'liq shu yerda qoladi */ 
   "Dushanba":[
     {num:1,cls:"6A",sub:"Kelajak soati",subjKey:"KELAJAK",time:"8:30 - 9:15"},
     {num:2,cls:"9",sub:"Ona tili",subjKey:"ONA TILI",time:"9:20 - 10:05"},
@@ -100,45 +122,70 @@ const week = {
   "Chorshanba":[{num:1,cls:"9",sub:"Ona tili",subjKey:"ONA TILI",time:"8:30 - 9:15"},{num:2,cls:"6B",sub:"Ona tili",subjKey:"ONA TILI",time:"9:20 - 10:05"},{num:3,cls:"11",sub:"Ona tili",subjKey:"ONA TILI",time:"10:10 - 10:55"},{num:4,cls:"7A",sub:"Ona tili",subjKey:"ONA TILI",time:"11:10 - 11:55"},{num:5,cls:"6A",sub:"Ona tili",subjKey:"ONA TILI",time:"12:00 - 12:45"},{num:6,empty:true}],
   "Payshanba":[{num:1,cls:"11",sub:"Adabiyot",subjKey:"ADABIYOT",time:"8:30 - 9:15"},{num:2,empty:true},{num:3,cls:"6A",sub:"Ona tili",subjKey:"ONA TILI",time:"10:10 - 10:55"},{num:4,cls:"9",sub:"Ona tili",subjKey:"ONA TILI",time:"11:10 - 11:55"},{num:5,cls:"6B",sub:"Ona tili",subjKey:"ONA TILI",time:"12:00 - 12:45"},{num:6,cls:"7A",sub:"Adabiyot",subjKey:"ADABIYOT",time:"12:50 - 13:35"}],
   "Juma":[{num:1,cls:"6A",sub:"Ona tili",subjKey:"ONA TILI",time:"8:30 - 9:15"},{num:2,cls:"7A",sub:"Ona tili",subjKey:"ONA TILI",time:"9:20 - 10:05"},{num:3,cls:"6B",sub:"Ona tili",subjKey:"ONA TILI",time:"10:10 - 10:55"},{num:4,cls:"9",sub:"Ona tili",subjKey:"ONA TILI",time:"11:10 - 11:55"},{num:5,cls:"11",sub:"Adabiyot",subjKey:"ADABIYOT",time:"12:00 - 12:45"},{num:6,empty:true}],
-  "Shanba":[{num:1,cls:"11",sub:"Adabiyot",subjKey:"ADABIYOT",time:"8:30 - 9:15"},{num:2,cls:"6A",sub:"Ona tili",subjKey:"ONA TILI",time:"9:20 - 10:05"},{num:3,cls:"6A",sub:"Adabiyot",subjKey:"ADABIYOT",time:"10:10 - 10:55"},{num:4,cls:"9",sub:"Adabiyot",subjKey:"ADABIYOT",time:"11:10 - 11:55"},{num:5,cls:"7A",sub:"Adabiyot",subjKey:"ADABIYOT",time:"12:00 - 12:45"},{num:6,empty:true}]
+  "Shanba":[{num:1,cls:"11",sub:"Adabiyot",subjKey:"ADABIYOT",time:"8:30 - 9:15"},{num:2,cls:"6A",sub:"Ona tili",subjKey:"ONA TILI",time:"9:20 - 10:05"},{num:3,cls:"6A",sub:"Adabiyot",subjKey:"ADABIYOT",time:"10:10 - 10:55"},{num:4,cls:"9",sub:"Adabiyot",subjKey:"ADABIYOT",time:"11:10 - 11:55"},{num:5,cls:"7A",sub:"Adabiyot",subjKey:"ADABIYOT",time:"12:00 - 12:45"},{num:6,empty:true}],
+  "Yakshanba":[{num:1,empty:true},{num:2,empty:true},{num:3,empty:true},{num:4,empty:true},{num:5,empty:true},{num:6,empty:true}]
 };
 
-function renderToday(){
+const monthNames = ["yanvar","fevral","mart","aprel","may","iyun","iyul","avgust","sentabr","oktabr","noyabr","dekabr"];
+
+function renderToday() {
   const now = new Date();
   const dd = now.getDate();
+  const mm = now.getMonth();
   const yyyy = now.getFullYear();
   const jsDay = now.getDay();
-  const days = {1:"Dushanba",2:"Seshanba",3:"Chorshanba",4:"Payshanba",5:"Juma",6:"Shanba",0:"Yakshanba"};
+  const days = {0:"Yakshanba",1:"Dushanba",2:"Seshanba",3:"Chorshanba",4:"Payshanba",5:"Juma",6:"Shanba"};
   const todayKey = days[jsDay];
 
-  document.getElementById('line1').textContent = `Bugun sana: ${dd}-noyabr ${yyyy} — ${todayKey}`;
+  document.getElementById('line1').textContent = `Bugun sana: ${dd}-${monthNames[mm]} ${yyyy} — ${todayKey}`;
   document.getElementById('line2').textContent = `Bugun haftaning: ${todayKey} kuni`;
 
   const lessons = week[todayKey] || [];
   const count = lessons.filter(l => !l.empty).length;
   document.getElementById('line3').textContent = `Bugun ${count} ta dars mavjud`;
 
-  const c = document.getElementById('rowsContainer');
-  c.innerHTML = '';
-  if(count===0){
-    c.innerHTML = '<div style="text-align:center;padding:50px;color:var(--muted);font-size:19px">Bugun dars yo\'q 😴</div>';
+  const container = document.getElementById('rowsContainer');
+  container.innerHTML = '';
+
+  if (count === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:60px;color:var(--muted);font-size:19px">Bugun dars yo\'q relax</div>';
     return;
   }
 
   lessons.forEach(ls => {
-    if(ls.empty){
-      c.innerHTML += `<div class="row disabled"><div class="left"><div class="num">${ls.num}. dars yo'q</div></div></div>`;
-    } else {
-      const key = `${ls.cls}|${ls.subjKey}`;
-      const link = journalLinks[key] || null;
-      const div = document.createElement('div');
-      div.className = 'row';
-      div.innerHTML = `<div class="left"><div class="num">${ls.num}. ${ls.cls} ›</div><div class="sub">${ls.sub}</div><div class="time">${ls.time}</div></div><div class="rightLabel">${link?'📘 Jurnal ▸':''}</div>`;
-      if(link) div.onclick = () => window.open(link,'_blank');
-      c.appendChild(div);
+    if (ls.empty) {
+      container.innerHTML += `<div class="row disabled"><div class="left"><div class="num">${ls.num}. dars yo'q</div></div></div>`;
+      return;
     }
+
+    const journalKey = `${ls.cls}|${ls.subjKey}`;
+    const journalUrl = journalLinks[journalKey] || null;
+    const homeworkUrl = getTodayHomeworkUrl(ls.cls, ls.subjKey);
+
+    const row = document.createElement('div');
+    row.className = 'row';
+
+    row.innerHTML = `
+      <div class="left" ${journalUrl ? `onclick="window.open('${journalUrl}','_blank')"` : ''} style="${journalUrl?'cursor:pointer':''}">
+        <div class="num">${ls.num}. ${ls.cls} ›</div>
+        <div class="sub">${ls.sub}</div>
+        <div class="time">${ls.time}</div>
+      </div>
+      <div class="buttons">
+        ${journalUrl ? `<div class="btn btn-journal">Jurnal</div>` : ''}
+        ${homeworkUrl ? `<div class="btn btn-homework" onclick="window.open('${homeworkUrl}','_blank')">Uyga vazifa</div>` : ''}
+      </div>
+    `;
+
+    // Uyga vazifa tugmasi bosilganda sahifa almashmasin
+    row.querySelectorAll('.btn-homework').forEach(btn => {
+      btn.addEventListener('click', e => e.stopPropagation());
+    });
+
+    container.appendChild(row);
   });
 }
+
 renderToday();
 
 // Hisobot tugmasi
